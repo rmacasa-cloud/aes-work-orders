@@ -3,6 +3,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 
+import { PriorityBadge } from "@/components/priority-badge";
 import { STATUS_LABELS, StatusPill } from "@/components/status-pill";
 import { Input } from "@/components/ui/input";
 import {
@@ -56,7 +57,7 @@ const COLUMNS: Column[] = [
   {
     key: "priority",
     label: "Priority",
-    cell: (order) => order.priority,
+    cell: (order) => <PriorityBadge priority={order.priority} />,
   },
   {
     key: "assignedTech",
@@ -186,7 +187,7 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
 
       <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             <TableRow>
               {COLUMNS.map((column) => {
                 const active = column.key === sortKey;
