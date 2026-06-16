@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AES Work Orders Dashboard
 
-## Getting Started
+A single-page dashboard for browsing field service work orders across customers
+and sites. The table supports per-column sorting, status filtering, and
+case-insensitive customer search, with colored status pills and priority
+indicators so the queue reads at a glance.
 
-First, run the development server:
+Data is 20 inline mock work orders — there is no backend. All sorting, filtering,
+and search run client-side.
+
+## Stack
+
+- **Next.js** (App Router) + **React**
+- **TypeScript** (strict, no `any`)
+- **Tailwind CSS**
+- **shadcn/ui** primitives (table, select, input, badge)
+
+## Architecture
+
+The page is split deliberately across the server/client boundary:
+
+- **`app/page.tsx`** is a **Server Component**. It owns the mock data and renders
+  the page shell, passing the work-order array down as props.
+- **`components/work-orders-table.tsx`** is the **Client Component**
+  (`'use client'`). It receives the data and owns all interactive state — sort
+  column and direction, status filter, and search query.
+
+Presentational pieces (`StatusPill`, `PriorityBadge`) are plain components used by
+both. Types live in `types/`, mock data in `data/`.
+
+## Running locally
+
+Requires **Node.js 20+**.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install      # install dependencies
+npm run dev      # start the dev server at http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Other scripts:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build    # production build
+npm start        # serve the production build
+npm run lint     # run ESLint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Reflection
 
-## Learn More
+<!--
+~200 words, in the author's own voice. Placeholder — replace the line below.
+Optional things to touch on (delete this comment when done):
+  - key design decisions / trade-offs (e.g. the server/client split, sorting
+    status & priority by domain order rather than alphabetically)
+  - what you'd add or change with more time
+  - anything intentionally left out of scope
+-->
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+_TODO: ~200-word reflection goes here._
