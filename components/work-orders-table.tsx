@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { STATUS_LABELS, StatusPill } from "@/components/status-pill";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -118,15 +119,21 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
   const [sortKey, setSortKey] = useState<keyof WorkOrder | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
+  const [search, setSearch] = useState("");
 
   const visibleOrders = useMemo(() => {
-    const filtered =
-      statusFilter === "ALL"
-        ? orders
-        : orders.filter((order) => order.status === statusFilter);
+    const query = search.trim().toLowerCase();
+    const filtered = orders.filter((order) => {
+      const matchesStatus =
+        statusFilter === "ALL" || order.status === statusFilter;
+      const matchesSearch =
+        query === "" || order.customer.toLowerCase().includes(query);
+      return matchesStatus && matchesSearch;
+    });
     if (!sortKey) return filtered;
     const direction = sortDirection === "asc" ? 1 : -1;
-    return [...filtered].sort((a, b) => {
+    // filtered is a fresh array from .filter(), so sorting it in place is safe.
+    return filtered.sort((a, b) => {
       const aValue = sortValue(a, sortKey);
       const bValue = sortValue(b, sortKey);
       if (typeof aValue === "number" && typeof bValue === "number") {
@@ -134,7 +141,7 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
       }
       return String(aValue).localeCompare(String(bValue)) * direction;
     });
-  }, [orders, statusFilter, sortKey, sortDirection]);
+  }, [orders, statusFilter, search, sortKey, sortDirection]);
 
   function toggleSort(key: keyof WorkOrder) {
     if (key === sortKey) {
@@ -148,11 +155,19 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
+        <Input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search customers…"
+          aria-label="Search by customer name"
+          className="w-full sm:w-64"
+        />
         <Select
           value={statusFilter}
           onValueChange={(value) => setStatusFilter(value as StatusFilter)}
         >
-          <SelectTrigger className="w-52" aria-label="Filter by status">
+          <SelectTrigger className="w-full sm:w-52" aria-label="Filter by status">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -164,7 +179,7 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
             ))}
           </SelectContent>
         </Select>
-        <p className="ml-auto text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground sm:ml-auto">
           Showing {visibleOrders.length} of {orders.length}
         </p>
       </div>
