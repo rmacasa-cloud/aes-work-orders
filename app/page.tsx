@@ -1,17 +1,8 @@
-import { StatusPill } from "@/components/status-pill";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { WorkOrdersTable } from "@/components/work-orders-table";
 import { workOrders } from "@/data/work-orders";
 
-// Server Component: owns the mock data and renders the shell. The interactive
-// layer (sort/filter/search) is extracted into a client component in a later
-// unit; for now this is a static render of all 20 rows.
+// Server Component: owns the mock data and renders the shell, delegating all
+// interactivity (sorting, and later filtering/search) to the client component.
 export default function WorkOrdersPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
@@ -22,38 +13,7 @@ export default function WorkOrdersPage() {
         </p>
       </header>
 
-      <div className="overflow-hidden rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Assigned Tech</TableHead>
-              <TableHead>Scheduled Date</TableHead>
-              <TableHead className="text-right">Hours Worked</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {workOrders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-mono text-xs">{order.id}</TableCell>
-                <TableCell className="font-medium">{order.customer}</TableCell>
-                <TableCell>
-                  <StatusPill status={order.status} />
-                </TableCell>
-                <TableCell>{order.priority}</TableCell>
-                <TableCell>{order.assignedTech}</TableCell>
-                <TableCell>{order.scheduledDate}</TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {order.hoursWorked}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <WorkOrdersTable orders={workOrders} />
     </main>
   );
 }
