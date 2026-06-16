@@ -1,3 +1,4 @@
+import { StatusPill } from "@/components/status-pill";
 import {
   Table,
   TableBody,
@@ -39,7 +40,9 @@ export default function WorkOrdersPage() {
               <TableRow key={order.id}>
                 <TableCell className="font-mono text-xs">{order.id}</TableCell>
                 <TableCell className="font-medium">{order.customer}</TableCell>
-                <TableCell>{order.status}</TableCell>
+                <TableCell>
+                  <StatusPill status={order.status} />
+                </TableCell>
                 <TableCell>{order.priority}</TableCell>
                 <TableCell>{order.assignedTech}</TableCell>
                 <TableCell>{order.scheduledDate}</TableCell>
