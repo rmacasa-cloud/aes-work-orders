@@ -213,20 +213,34 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visibleOrders.map((order) => (
-              <TableRow key={order.id}>
-                {COLUMNS.map((column) => (
-                  <TableCell
-                    key={column.key}
-                    className={
-                      column.numeric ? "text-right tabular-nums" : undefined
-                    }
-                  >
-                    {column.cell(order)}
-                  </TableCell>
-                ))}
+            {visibleOrders.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell
+                  colSpan={COLUMNS.length}
+                  className="h-32 text-center whitespace-normal"
+                >
+                  <p className="font-medium">No work orders found</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Try adjusting your search or status filter.
+                  </p>
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              visibleOrders.map((order) => (
+                <TableRow key={order.id}>
+                  {COLUMNS.map((column) => (
+                    <TableCell
+                      key={column.key}
+                      className={
+                        column.numeric ? "text-right tabular-nums" : undefined
+                      }
+                    >
+                      {column.cell(order)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
