@@ -3,7 +3,8 @@
 A single-page dashboard for browsing field service work orders across customers
 and sites. The table supports per-column sorting, status filtering, and
 case-insensitive customer search, with colored status pills and priority
-indicators so the queue reads at a glance.
+indicators so the queue reads at a glance. Intentionally simple UI for readability
+and clarity.
 
 Data is 20 inline mock work orders — there is no backend. All sorting, filtering,
 and search run client-side.
