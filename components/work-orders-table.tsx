@@ -185,7 +185,7 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
