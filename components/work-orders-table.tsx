@@ -3,7 +3,14 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 
-import { StatusPill } from "@/components/status-pill";
+import { STATUS_LABELS, StatusPill } from "@/components/status-pill";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -20,6 +27,7 @@ import type {
 } from "@/types/work-order";
 
 type SortDirection = "asc" | "desc";
+type StatusFilter = WorkOrderStatus | "ALL";
 
 type Column = {
   key: keyof WorkOrder;
@@ -67,30 +75,26 @@ const COLUMNS: Column[] = [
   },
 ];
 
-// Status and priority sort by domain order (lifecycle / severity) rather than
-// alphabetically, so sorting those columns is actually meaningful.
-const STATUS_RANK: Record<WorkOrderStatus, number> = {
-  NEW: 0,
-  SCHEDULED: 1,
-  IN_PROGRESS: 2,
-  WAITING_ON_PARTS: 3,
-  COMPLETED: 4,
-  CANCELLED: 5,
-};
+// Canonical domain orderings: status by lifecycle, priority by severity. Used
+// both to sort those columns meaningfully (not alphabetically) and to order the
+// status filter's options.
+const STATUS_ORDER: WorkOrderStatus[] = [
+  "NEW",
+  "SCHEDULED",
+  "IN_PROGRESS",
+  "WAITING_ON_PARTS",
+  "COMPLETED",
+  "CANCELLED",
+];
 
-const PRIORITY_RANK: Record<WorkOrderPriority, number> = {
-  LOW: 0,
-  MEDIUM: 1,
-  HIGH: 2,
-  URGENT: 3,
-};
+const PRIORITY_ORDER: WorkOrderPriority[] = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
 function sortValue(order: WorkOrder, key: keyof WorkOrder): string | number {
   switch (key) {
     case "status":
-      return STATUS_RANK[order.status];
+      return STATUS_ORDER.indexOf(order.status);
     case "priority":
-      return PRIORITY_RANK[order.priority];
+      return PRIORITY_ORDER.indexOf(order.priority);
     case "hoursWorked":
       return order.hoursWorked;
     case "customer":
@@ -113,11 +117,16 @@ function ariaSort(
 export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
   const [sortKey, setSortKey] = useState<keyof WorkOrder | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
 
-  const sortedOrders = useMemo(() => {
-    if (!sortKey) return orders;
+  const visibleOrders = useMemo(() => {
+    const filtered =
+      statusFilter === "ALL"
+        ? orders
+        : orders.filter((order) => order.status === statusFilter);
+    if (!sortKey) return filtered;
     const direction = sortDirection === "asc" ? 1 : -1;
-    return [...orders].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       const aValue = sortValue(a, sortKey);
       const bValue = sortValue(b, sortKey);
       if (typeof aValue === "number" && typeof bValue === "number") {
@@ -125,7 +134,7 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
       }
       return String(aValue).localeCompare(String(bValue)) * direction;
     });
-  }, [orders, sortKey, sortDirection]);
+  }, [orders, statusFilter, sortKey, sortDirection]);
 
   function toggleSort(key: keyof WorkOrder) {
     if (key === sortKey) {
@@ -137,51 +146,75 @@ export function WorkOrdersTable({ orders }: { orders: WorkOrder[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {COLUMNS.map((column) => {
-              const active = column.key === sortKey;
-              return (
-                <TableHead
-                  key={column.key}
-                  aria-sort={ariaSort(active, sortDirection)}
-                  className={column.numeric ? "text-right" : undefined}
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleSort(column.key)}
-                    className={cn(
-                      "inline-flex cursor-pointer items-center gap-1.5 rounded-sm outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
-                      active ? "text-foreground" : "text-muted-foreground"
-                    )}
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <Select
+          value={statusFilter}
+          onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+        >
+          <SelectTrigger className="w-52" aria-label="Filter by status">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All statuses</SelectItem>
+            {STATUS_ORDER.map((status) => (
+              <SelectItem key={status} value={status}>
+                {STATUS_LABELS[status]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="ml-auto text-sm text-muted-foreground">
+          Showing {visibleOrders.length} of {orders.length}
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {COLUMNS.map((column) => {
+                const active = column.key === sortKey;
+                return (
+                  <TableHead
+                    key={column.key}
+                    aria-sort={ariaSort(active, sortDirection)}
+                    className={column.numeric ? "text-right" : undefined}
                   >
-                    {column.label}
-                    <SortIcon active={active} direction={sortDirection} />
-                  </button>
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedOrders.map((order) => (
-            <TableRow key={order.id}>
-              {COLUMNS.map((column) => (
-                <TableCell
-                  key={column.key}
-                  className={
-                    column.numeric ? "text-right tabular-nums" : undefined
-                  }
-                >
-                  {column.cell(order)}
-                </TableCell>
-              ))}
+                    <button
+                      type="button"
+                      onClick={() => toggleSort(column.key)}
+                      className={cn(
+                        "inline-flex cursor-pointer items-center gap-1.5 rounded-sm outline-none transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
+                        active ? "text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      {column.label}
+                      <SortIcon active={active} direction={sortDirection} />
+                    </button>
+                  </TableHead>
+                );
+              })}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {visibleOrders.map((order) => (
+              <TableRow key={order.id}>
+                {COLUMNS.map((column) => (
+                  <TableCell
+                    key={column.key}
+                    className={
+                      column.numeric ? "text-right tabular-nums" : undefined
+                    }
+                  >
+                    {column.cell(order)}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
