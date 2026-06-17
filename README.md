@@ -48,13 +48,8 @@ npm run lint     # run ESLint
 
 ## Reflection
 
-<!--
-~200 words, in the author's own voice. Placeholder — replace the line below.
-Optional things to touch on (delete this comment when done):
-  - key design decisions / trade-offs (e.g. the server/client split, sorting
-    status & priority by domain order rather than alphabetically)
-  - what you'd add or change with more time
-  - anything intentionally left out of scope
--->
+I used Claude Code for the high volume work of generating the twenty mock work orders and setting up the shadcn table, select, and input elements. I specified the shape of what would be realistic such as the customer rosters that read like actual aerospace customers and battery testing companies, hours that were consistent with statuses, etc. Then I just told it to go ahead and generate them all before I started typing out my own data, and through all of this I'm still deciding whether or not something is “realistic” by checking each row for accuracy.
 
-_TODO: ~200-word reflection goes here._
+One thing I pushed back on was sort semantics. If you simply use the obvious path and sort every column alphabetically, then the status will be sorted alphabetically too giving you Cancelled, Completed, and In Progress, which doesn’t tell an operator anything. So I had it sort status based on lifecycle (New -> Completed) and priority based on severity (Low -> Urgent), and instead of using a generic alphabetical order array, I created specific order arrays to create explicit rules when sorting these columns, therefore making this sort useful to someone who is actively triaging a queue.
+
+If I had more time, I would mute the priority badge on completed jobs because a finished job’s urgency is no longer actionable and test the interaction of the status filter and search functionality at their point of composition because that area of the application is where the most subtle edge cases are hiding.
