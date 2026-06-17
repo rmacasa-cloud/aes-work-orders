@@ -6,18 +6,7 @@ for how to sequence the work. This file governs HOW you operate.
 
 ## Hard rules (do not violate)
 
-1. **NEVER run `git commit`, `git add`, or any git command that writes history.**
-   The human (GitHub user `rmacasa-cloud`) makes every commit by hand, authored
-   under their own name. Your job is to write code and then STOP at the commit
-   boundaries defined in `agents.md` so they can review and commit. Do not stage,
-   do not commit, do not push. If you think a commit should happen, say
-   "Ready to commit: <suggested message>" and stop.
-
-2. **Do not add Co-Authored-By trailers or any AI-attribution lines anywhere** —
-   not in commits (you aren't committing anyway), not in file headers, not in the
-   README. The human authors the history.
-
-3. **Stay in scope.** This is time-boxed. Build exactly what `spec.md` lists.
+ **Stay in scope.** This is time-boxed. Build exactly what `spec.md` lists.
    Do not add a database, auth, routing beyond the single page, state management
    libraries, or extra pages. Inline/static mock data only.
 
